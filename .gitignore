@@ -1,0 +1,15 @@
+bin/
+obj/
+platforms/
+AppPackages/
+*.app
+*.apk
+*.aab
+*.exe
+*.msi
+*.user
+*.suo
+*.db
+.vscode/
+.idea/
+.vs
