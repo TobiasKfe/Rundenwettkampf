@@ -1,6 +1,5 @@
 bin/
 obj/
-platforms/
 AppPackages/
 *.app
 *.apk
