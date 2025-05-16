@@ -1,4 +1,7 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
+using Rundenwettkampf.Data;
+using Rundenwettkampf.Services;
 
 namespace Rundenwettkampf;
 
@@ -16,8 +19,12 @@ public static class MauiProgram
 
 		builder.Services.AddMauiBlazorWebView();
 
+		builder.Services.AddDbContext<AppDbContext>();
+
+        builder.Services.AddSingleton<PersonService>();
+
 #if DEBUG
-		builder.Services.AddBlazorWebViewDeveloperTools();
+        builder.Services.AddBlazorWebViewDeveloperTools();
 		builder.Logging.AddDebug();
 #endif
 

@@ -1,0 +1,77 @@
+﻿@using Rundenwettkampf.Models
+@inject Services.PersonService PersonService
+@page "/person"
+
+<h1>Schützen</h1>
+<h2>Neuen Schützen anlegen</h2>
+<form @onsubmit="SavePerson">
+    <div>
+        <label for="startNo">Startnummer:</label>
+        <input type="number" id="startNo" @bind="newPerson.StartNo" required />
+    </div>
+	<div>
+		<label for="gender">Geschlecht:</label>
+		<input type="text" id="gender" @bind="newPerson.Gender" required />
+	</div>
+    <div>
+        <label for="handicap">Behinderung:</label>
+        <input type="text" id="handicap" @bind="newPerson.Handicap" />
+    </div>
+    <div>
+        <label for="firstName">Vorname:</label>
+        <input type="text" id="firstName" @bind="newPerson.FirstName" required />
+    </div>
+    <div>
+        <label for="lastName">Nachname:</label>
+        <input type="text" id="lastName" @bind="newPerson.LastName" required />
+    </div>
+    <div>
+        <label for="birthDate">Geburtstag:</label>
+        <input type="date" id="birthDate" @bind="newPerson.BirthDate" required />
+    </div>
+
+    <button type="submit">Speichern</button>
+</form>
+
+<h2>Gespeicherte Schützen</h2>
+<table>
+	<tr>
+		<th>Startnummer</th>
+		<th>Geschlecht</th>
+		<th>Behinderung</th>
+		<th>Vorname</th>
+		<th>Nachname</th>
+		<th>Geburtstag</th>
+	</tr>
+	@foreach (var person in PersonService.GetAll())
+	{
+		<tr>
+			<td>@person.StartNo</td>
+			<td>@person.Gender</td>
+			<td>@person.Handicap</td>
+			<td>@person.FirstName</td>
+			<td>@person.LastName</td>
+			<td>@person.BirthDate.ToShortDateString()</td>
+		</tr>
+	}
+</table>
+@code {
+	private Person newPerson = new();
+	private List<Person> people = new();
+
+	protected override async Task OnInitializedAsync()
+	{
+		people = PersonService.GetAll();
+	}
+
+	private void SavePerson()
+	{
+		if (newPerson.Handicap == null)
+		{
+			newPerson.Handicap = "-";
+		}
+		PersonService.Add(newPerson);
+		newPerson = new Person();
+		people = PersonService.GetAll();
+	}
+}
