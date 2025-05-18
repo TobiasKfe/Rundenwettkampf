@@ -4,33 +4,9 @@
 
 <h1>Schützen</h1>
 <h2>Neuen Schützen anlegen</h2>
-<form @onsubmit="SavePerson">
-    <div>
-        <label for="startNo">Startnummer:</label>
-        <input type="number" id="startNo" @bind="newPerson.StartNo" required />
-    </div>
-	<div>
-		<label for="gender">Geschlecht:</label>
-		<input type="text" id="gender" @bind="newPerson.Gender" required />
-	</div>
-    <div>
-        <label for="handicap">Behinderung:</label>
-        <input type="text" id="handicap" @bind="newPerson.Handicap" />
-    </div>
-    <div>
-        <label for="firstName">Vorname:</label>
-        <input type="text" id="firstName" @bind="newPerson.FirstName" required />
-    </div>
-    <div>
-        <label for="lastName">Nachname:</label>
-        <input type="text" id="lastName" @bind="newPerson.LastName" required />
-    </div>
-    <div>
-        <label for="birthDate">Geburtstag:</label>
-        <input type="date" id="birthDate" @bind="newPerson.BirthDate" required />
-    </div>
-
-    <button type="submit">Speichern</button>
+<form>
+	<input type="number" @bind="addingCount" placeholder="Wie viele Zeilen?" required />
+	<button @onclick="addNewRows" >Speichern</button>
 </form>
 
 <h2>Gespeicherte Schützen</h2>
@@ -42,36 +18,127 @@
 		<th>Vorname</th>
 		<th>Nachname</th>
 		<th>Geburtstag</th>
+		<th>Aktionen</th>
 	</tr>
 	@foreach (var person in PersonService.GetAll())
 	{
-		<tr>
-			<td>@person.StartNo</td>
-			<td>@person.Gender</td>
-			<td>@person.Handicap</td>
-			<td>@person.FirstName</td>
-			<td>@person.LastName</td>
-			<td>@person.BirthDate.ToShortDateString()</td>
-		</tr>
+		@if(editStartNo == person.StartNo)
+		{
+			<tr>
+				<td>@person.StartNo</td>
+				<td><input type="text" @bind="editPerson.Gender" required /></td>
+				<td><input type="text" @bind="editPerson.Handicap" required /></td>
+				<td><input type="text" @bind="editPerson.FirstName" required /></td>
+				<td><input type="text" @bind="editPerson.LastName" required /></td>
+				<td><input type="date" @bind="editPerson.BirthDate" required /></td>
+				<td>
+					<button @onclick="() => UpdatePerson(editPerson)">Speichern</button>
+					<button @onclick="() => StopEditing()">Abbrechen</button>
+				</td>
+			</tr>
+		} else
+		{	
+			<tr>
+				<td>@person.StartNo</td>
+				<td>@person.Gender</td>
+				<td>@person.Handicap</td>
+				<td>@person.FirstName</td>
+				<td>@person.LastName</td>
+				<td>
+					@if (person.BirthDate.Year <= 1900)
+					{
+						<p>-</p>
+					} else
+					{
+						@person.BirthDate.ToShortDateString()
+					}
+				</td>
+				<td>
+					<button @onclick="() => EditPerson(person.StartNo)">Editieren</button>
+					<button @onclick="() => DeletePerson(person.Id)">Löschen</button>
+
+				</td>
+			</tr>
+		}
 	}
 </table>
 @code {
-	private Person newPerson = new();
 	private List<Person> people = new();
+	private int editStartNo = 0;
+	private Person editPerson = new();
+	private Person person1 = new();
+	private int addingCount = 0;
 
 	protected override async Task OnInitializedAsync()
 	{
 		people = PersonService.GetAll();
 	}
 
-	private void SavePerson()
+	private void addNewRows()
 	{
-		if (newPerson.Handicap == null)
+		for(int i = 0; i < addingCount; i++)
 		{
-			newPerson.Handicap = "-";
+			Person person = new();
+			person.StartNo = people.Count + i + 1;
+			person.Gender = "-";
+			person.Handicap = "-";
+			person.FirstName = "-";
+			person.LastName = "-";
+			PersonService.Add(person);
 		}
-		PersonService.Add(newPerson);
-		newPerson = new Person();
 		people = PersonService.GetAll();
+	}
+
+	private void SavePerson(Person person)
+	{
+		if (person.Handicap == null)
+		{
+			person.Handicap = "-";
+		}
+		PersonService.Add(person);
+		people = PersonService.GetAll();
+	}
+
+	private void DeletePerson(int id)
+	{
+		PersonService.Delete(id);
+		people = PersonService.GetAll();
+	}
+
+	private void StopEditing()
+	{
+		editStartNo = 0;
+		editPerson = new();
+		people = PersonService.GetAll();
+	}
+
+	private void UpdatePerson(Person person)
+	{
+		Person original = PersonService.GetByStartNo(person.StartNo);
+		original.Gender = person.Gender;
+		original.Handicap = person.Handicap;
+		original.FirstName = person.FirstName;
+		original.LastName = person.LastName;
+		original.BirthDate = person.BirthDate;
+		PersonService.Update(original);
+		editStartNo = 0;
+		editPerson = new();
+		people = PersonService.GetAll();
+	}
+
+	private void EditPerson(int startNo)
+	{
+		editStartNo = startNo;
+		Person original = PersonService.GetByStartNo(startNo);
+		editPerson = new Person
+		{
+			Id = original.Id,
+			StartNo = original.StartNo,
+			Gender = original.Gender,
+			Handicap = original.Handicap,
+			FirstName = original.FirstName,
+			LastName = original.LastName,
+			BirthDate = original.BirthDate
+		};
 	}
 }

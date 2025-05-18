@@ -26,5 +26,26 @@ namespace Rundenwettkampf.Services
             _db.Persons.Add(person);
             _db.SaveChanges();
         }
+
+        public Person GetByStartNo(int startNo) => _db.Persons.FirstOrDefault(p => p.StartNo == startNo);
+
+        public void Update(Person person)
+        {
+            _db.Persons.Update(person);
+            _db.SaveChanges();
+        }
+
+        public void Delete(int id)
+        {
+            var person = _db.Persons.Find(id);
+            if (person != null)
+            {
+                person.Gender = "-";
+                person.Handicap = "-";
+                person.FirstName = "-";
+                person.LastName = "-";
+                person.BirthDate = DateTime.MinValue;
+            }
+        }
     }
 }
