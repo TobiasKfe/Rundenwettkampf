@@ -3,9 +3,10 @@
 @page "/person"
 
 <h1>Schützen</h1>
-<h2>Neuen Schützen anlegen</h2>
+<h2>Neue Zeilen anlegen</h2>
 <form>
-	<input type="number" @bind="addingCount" placeholder="Wie viele Zeilen?" required />
+	<label for="rowCounter">Anzahl der Zeilen:</label>
+	<input id="rowCounter" type="number" @bind="addingCount" required />
 	<button @onclick="addNewRows" >Speichern</button>
 </form>
 
@@ -86,16 +87,6 @@
 			person.LastName = "-";
 			PersonService.Add(person);
 		}
-		people = PersonService.GetAll();
-	}
-
-	private void SavePerson(Person person)
-	{
-		if (person.Handicap == null)
-		{
-			person.Handicap = "-";
-		}
-		PersonService.Add(person);
 		people = PersonService.GetAll();
 	}
 
