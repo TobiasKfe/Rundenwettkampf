@@ -1,6 +1,102 @@
-﻿@page "/club"
-<h3>ClubPage</h3>
+﻿@using Rundenwettkampf.Models
+@using Rundenwettkampf.Services
+
+@page "/club"
+@inject ClubService ClubService
+
+<h1>Vereine</h1>
+<h2>Neue Zeilen anlegen</h2>
+<form>
+	<label for="rowCounter">Anzahl der Zeilen:</label>
+	<input id="rowCounter" type="number" @bind="addingCount" required />
+	<button @onclick="addNewRows" >Speichern</button>
+</form>
+
+<h2>Gespeicherte Vereine</h2>
+<table>
+	<tr>
+		<th>Vereinsnummer</th>
+		<th>Vereinsname</th>
+		<th>Aktionen</th>
+	</tr>
+	@foreach (var club in ClubService.GetAll())
+	{
+		<tr>
+			@if (editClubNo == club.No)
+			{
+				<td>@club.No</td>
+				<td><input type="text" @bind="editClub.Name" required /></td>
+				<td>
+					<button @onclick="() => UpdateClub(editClub)">Speichern</button>
+					<button @onclick="() => StopEditing()">Abbrechen</button>
+				</td>
+			}
+			else
+			{
+				<td>@club.No</td>
+				<td>@club.Name</td>
+				<td>
+					<button @onclick="() => EditClub(club.No)">Editieren</button>
+					<button @onclick="() => DeleteClub(club.Id)">Löschen</button>
+				</td>
+			}
+		</tr>
+	}
+</table>
 
 @code {
+	private List<Club> clubs = new();
+	private int addingCount = 0;
+	private Club editClub;
+	private int editClubNo = 0;
 
+	protected override async Task OnInitializedAsync()
+	{
+		clubs = ClubService.GetAll();
+	}
+
+	private void addNewRows()
+	{
+		for (int i = 0; i < addingCount; i++)
+		{
+			Club club = new Club();
+			club.No = clubs.Count + i + 1;
+			club.Name = "-";
+			ClubService.Add(club);
+		}
+		clubs = ClubService.GetAll();
+	}
+
+	private void EditClub(int clubNo)
+	{
+		editClubNo = clubNo;
+		Club oríginal = ClubService.GetByNo(clubNo);
+		editClub = new Club
+		{
+			Id = oríginal.Id,
+			No = oríginal.No,
+			Name = oríginal.Name
+		};
+	}
+
+	private void StopEditing()
+	{
+		editClub = new();
+		editClubNo = 0;
+		clubs = ClubService.GetAll();
+	}
+
+	private void UpdateClub(Club club)
+	{
+		Club original = ClubService.GetByNo(club.No);
+		original.Name = club.Name;
+		ClubService.Update(original);
+		StopEditing();
+	}
+
+	private void DeleteClub(int id)
+	{
+		ClubService.Delete(id);
+		clubs = ClubService.GetAll();
+	}
 }

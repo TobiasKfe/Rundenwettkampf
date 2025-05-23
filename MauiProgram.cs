@@ -22,6 +22,7 @@ public static class MauiProgram
 		builder.Services.AddDbContext<AppDbContext>();
 
         builder.Services.AddSingleton<PersonService>();
+        builder.Services.AddSingleton<ClubService>();
 
 #if DEBUG
         builder.Services.AddBlazorWebViewDeveloperTools();

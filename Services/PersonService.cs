@@ -16,7 +16,7 @@ namespace Rundenwettkampf.Services
         public PersonService(AppDbContext db)
         {
             _db = db;
-            _db.Database.EnsureCreated(); // Erstellt DB beim ersten Zugriff
+            _db.Database.EnsureCreated();
         }
 
         public List<Person> GetAll() => _db.Persons.ToList();
@@ -45,6 +45,7 @@ namespace Rundenwettkampf.Services
                 person.FirstName = "-";
                 person.LastName = "-";
                 person.BirthDate = DateTime.MinValue;
+                Update(person);
             }
         }
     }
