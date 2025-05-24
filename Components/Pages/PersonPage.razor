@@ -21,7 +21,7 @@
 		<th>Geburtstag</th>
 		<th>Aktionen</th>
 	</tr>
-	@foreach (var person in PersonService.GetAll())
+	@foreach (var person in people)
 	{
 		@if(editStartNo == person.StartNo)
 		{

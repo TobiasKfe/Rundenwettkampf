@@ -4,6 +4,7 @@ using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Rundenwettkampf.utils;
 
 namespace Rundenwettkampf.Models
 {
@@ -15,6 +16,6 @@ namespace Rundenwettkampf.Models
         public int MaxAge { get; set; }
         public string Title { get; set; }
         public int No { get; set; }
-        public bool IsLaid { get; set; }
+        public AgeClassType Type { get; set; }
     }
 }

@@ -23,6 +23,8 @@ public static class MauiProgram
 
         builder.Services.AddSingleton<PersonService>();
         builder.Services.AddSingleton<ClubService>();
+        builder.Services.AddSingleton<LeagueService>();
+        builder.Services.AddSingleton<AgeClassService>();
 
 #if DEBUG
         builder.Services.AddBlazorWebViewDeveloperTools();

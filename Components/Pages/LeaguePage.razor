@@ -1,6 +1,107 @@
-﻿@page "/league"
-<h3>LeaguePage</h3>
+﻿@using Rundenwettkampf.Models
+@using Rundenwettkampf.Services
+@page "/league"
+@inject LeagueService LeagueService
+
+<h1>Ligen</h1>
+<h2>Neue Zeilen anlegen</h2>
+<form>
+	<label for="rowCounter">Anzahl der Zeilen:</label>
+	<input id="rowCounter" type="number" @bind="addingCount" required />
+	<button @onclick="addNewRows">Speichern</button>
+</form>
+
+<h2>Gespeicherte Ligen</h2>
+<table>
+	<tr>
+		<th>Ligennummer</th>
+		<th>Ligatitel</th>
+		<th>Kurztitel</th>
+		<th>Aktionen</th>
+	</tr>
+	@foreach (var league in leagues)
+	{
+		<tr>
+			@if (editLeagueNo == league.No)
+			{
+				<td>@league.No</td>
+				<td><input type="text" @bind="editLeague.Title" required /></td>
+				<td><input type="text" @bind="editLeague.ShortTitle" required /></td>
+				<td>
+					<button @onclick="() => UpdateLeague(editLeague)">Speichern</button>
+					<button @onclick="() => StopEditing()">Abbrechen</button>
+				</td>
+			}
+			else
+			{
+				<td>@league.No</td>
+				<td>@league.Title</td>
+				<td>@league.ShortTitle</td>
+				<td>
+					<button @onclick="() => EditLeague(league.No)">Editieren</button>
+					<button @onclick="() => DeleteLeague(league.Id)">Löschen</button>
+				</td>
+			}
+		</tr>
+	}
+</table>
 
 @code {
+	private List<League> leagues = new();
+	private int addingCount = 0;
+	private League editLeague;
+	private int editLeagueNo = 0;
 
+	protected override async Task OnInitializedAsync()
+	{
+		leagues = LeagueService.GetAll();
+	}
+
+	private void addNewRows()
+	{
+		for (int i = 0; i < addingCount; i++)
+		{
+			var league = new League();
+			league.No = leagues.Count + i + 1;
+			league.Title = "-";
+			league.ShortTitle = "-";
+			LeagueService.Add(league);
+		}
+		leagues = LeagueService.GetAll();
+	}
+
+	private void EditLeague(int leagueNo)
+	{
+		editLeagueNo = leagueNo;
+		League original = LeagueService.GetByNo(leagueNo);
+		editLeague = new League
+		{
+			Id = original.Id,
+			No = original.No,
+			Title = original.Title,
+			ShortTitle = original.ShortTitle
+		};
+	}
+
+	private void StopEditing()
+	{
+		editLeague = null;
+		editLeagueNo = 0;
+		leagues = LeagueService.GetAll();
+	}
+
+	private void UpdateLeague(League league)
+	{
+		League original = LeagueService.GetByNo(league.No);
+		original.Title = league.Title;
+		original.ShortTitle = league.ShortTitle;
+		LeagueService.Update(original);
+		StopEditing();
+	}
+
+	private void DeleteLeague(int id)
+	{
+		LeagueService.Delete(id);
+		leagues = LeagueService.GetAll();
+	}
 }

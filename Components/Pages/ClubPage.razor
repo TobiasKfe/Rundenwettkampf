@@ -19,7 +19,7 @@
 		<th>Vereinsname</th>
 		<th>Aktionen</th>
 	</tr>
-	@foreach (var club in ClubService.GetAll())
+	@foreach (var club in clubs)
 	{
 		<tr>
 			@if (editClubNo == club.No)
