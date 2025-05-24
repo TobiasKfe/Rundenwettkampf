@@ -40,8 +40,8 @@ namespace Rundenwettkampf.Services
             if (club != null)
             {
                 club.Name = "-";
+                 Update(club);
             }
-            Update(club);
         }
     }
 }
