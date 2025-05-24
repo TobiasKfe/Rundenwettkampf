@@ -1,6 +1,158 @@
-﻿@page "/ageclass"
+﻿@using Rundenwettkampf.Models
+@using Rundenwettkampf.Services
+@using Rundenwettkampf.utils
+@page "/ageclass"
+@inject AgeClassService AgeClassService
+
 <h1>Altersklassen</h1>
+<form>
+	<label for="rowCounter">Anzahl der Zeilen:</label>
+	<input id="rowCounter" type="number" @bind="addingCount" required />
+	<button @onclick="addNewRows">Speichern</button>
+</form>
+
+<button @onclick="() => SetAgeClassType(AgeClassType.Male)">Herren</button>
+<button @onclick="() => SetAgeClassType(AgeClassType.Female)">Damen</button>
+<button @onclick="() => SetAgeClassType(AgeClassType.IsLaidMale)">Herren Auflage</button>
+<button @onclick="() => SetAgeClassType(AgeClassType.IsLaidFemale)">Damen Auflage</button>
+
+<h2>Gespeicherte Altersklasse: @AgeClassTypeTitle</h2>
+<table>
+	<tr>
+		<th>Altersklassen-Nummer</th>
+		<th>Altersklasse</th>
+		<th>Min. Alter</th>
+		<th>Max. Alter</th>
+		<th>Aktionen</th>
+	</tr>
+	@foreach (var ageClass in ageClasses)
+	{
+		<tr>
+			@if(editAgeClassNo == ageClass.No)
+			{
+				<td>@ageClass.No</td>
+				<td><input type="text" @bind="editAgeClass.Title" required /></td>
+				<td><input type="number" @bind="editAgeClass.MinAge" required /></td>
+				<td><input type="number" @bind="editAgeClass.MaxAge" required /></td>
+				<td>
+					<button @onclick="() => UpdateAgeClass(editAgeClass)">Speichern</button>
+					<button @onclick="StopEditing">Abbrechen</button>
+				</td>
+			}
+			else
+			{
+				<td>@ageClass.No</td>
+				<td>@ageClass.Title</td>
+				<td>@ageClass.MinAge</td>
+				<td>@ageClass.MaxAge</td>
+				<td>
+					<button @onclick="() => EditAgeClass(ageClass.No)">Editieren</button>
+					<button @onclick="() => DeleteAgeClass(ageClass.Id)">Löschen</button>
+				</td>
+			}
+		</tr>
+	}
+</table>
 
 @code {
+	private string AgeClassTypeTitle = "Herren";
+	private AgeClassType ageClassType = AgeClassType.Male;
 
+	private int addingCount = 0;
+	private List<AgeClass> ageClasses = new();
+	private AgeClass editAgeClass = new();
+	private int editAgeClassNo = 0;
+
+	protected override async Task OnInitializedAsync()
+	{
+		ageClasses = AgeClassService.GetAllByType(ageClassType);
+	}
+
+	private void SetAgeClassType(AgeClassType type)
+	{
+		ageClassType = type;
+		switch (type)
+		{
+			case AgeClassType.None:
+			{
+				AgeClassTypeTitle = "Keine Altersklasse";
+				break;
+			}
+			case AgeClassType.Male:
+			{
+				AgeClassTypeTitle = "Herren";
+				break;
+			}
+			case AgeClassType.Female:
+			{
+				AgeClassTypeTitle = "Damen";
+				break;
+			}
+			case AgeClassType.IsLaidMale:
+			{
+				AgeClassTypeTitle = "Herren Auflage";
+				break;
+			}
+			case AgeClassType.IsLaidFemale:
+			{
+				AgeClassTypeTitle = "Damen Auflage";
+				break;
+			}
+		}
+		ageClasses = AgeClassService.GetAllByType(ageClassType);
+	}
+
+	private void addNewRows()
+	{
+		for (int i = 0; i < addingCount; i++)
+		{
+			AgeClass ageClass = new AgeClass();
+			ageClass.No = ageClasses.Count + i + 1;
+			ageClass.Type = ageClassType;
+			ageClass.MinAge = 0;
+			ageClass.MaxAge = 0;
+			ageClass.Title = "-";
+			AgeClassService.Add(ageClass);
+		}
+		ageClasses = AgeClassService.GetAllByType(ageClassType);
+	}
+
+	private void EditAgeClass(int ageClassNo)
+	{
+		editAgeClassNo = ageClassNo;
+		AgeClass original = AgeClassService.GetByNo(ageClassNo, ageClassType);
+		editAgeClass = new AgeClass
+		{
+			Id = original.Id,
+			No = original.No,
+			Type = original.Type,
+			MinAge = original.MinAge,
+			MaxAge = original.MaxAge,
+			Title = original.Title
+		};
+	}
+
+	private void StopEditing()
+	{
+		editAgeClass = new();
+		editAgeClassNo = 0;
+		ageClasses = AgeClassService.GetAllByType(ageClassType);
+	}
+
+	private void UpdateAgeClass(AgeClass ageClass)
+	{
+		AgeClass original = AgeClassService.GetByNo(ageClass.No, ageClassType);
+		original.Type = ageClass.Type;
+		original.MinAge = ageClass.MinAge;
+		original.MaxAge = ageClass.MaxAge;
+		original.Title = ageClass.Title;
+		AgeClassService.Update(original);
+		StopEditing();
+	}
+
+	private void DeleteAgeClass(int id)
+	{
+		AgeClassService.Delete(id);
+		ageClasses = AgeClassService.GetAllByType(ageClassType);
+	}
 }
